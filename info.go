@@ -4,22 +4,22 @@ import (
 	"context"
 	"io/fs"
 	"os"
-	"storj.io/storj/storage"
-	"storj.io/storj/storage/filestore"
+	"storj.io/storj/storagenode/blobstore"
+	"storj.io/storj/storagenode/blobstore/filestore"
 	"time"
 )
 
 type BlobInfo struct {
-	ref  storage.BlobRef
+	ref  blobstore.BlobRef
 	size int64
 	name string
 }
 
-func (i BlobInfo) BlobRef() storage.BlobRef {
+func (i BlobInfo) BlobRef() blobstore.BlobRef {
 	return i.ref
 }
 
-func (i BlobInfo) StorageFormatVersion() storage.FormatVersion {
+func (i BlobInfo) StorageFormatVersion() blobstore.FormatVersion {
 	return filestore.FormatV1
 }
 
@@ -34,7 +34,7 @@ func (i BlobInfo) Stat(ctx context.Context) (os.FileInfo, error) {
 	}, nil
 }
 
-var _ storage.BlobInfo = BlobInfo{}
+var _ blobstore.BlobInfo = BlobInfo{}
 
 type FileInfo struct {
 	name string

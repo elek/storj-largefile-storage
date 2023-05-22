@@ -15,7 +15,7 @@ import (
 	"sort"
 	"storj.io/common/memory"
 	"storj.io/common/testrand"
-	"storj.io/storj/storage"
+	"storj.io/storj/storagenode/blobstore"
 	"testing"
 )
 
@@ -25,7 +25,7 @@ const (
 )
 
 func TestStoreLoad(t *testing.T) {
-	largefile.TestStores(t, func(ctx context.Context, store storage.Blobs) {
+	largefile.TestStores(t, func(ctx context.Context, t *testing.T, store blobstore.Blobs) {
 
 		const blobSize = 8 << 10
 		const repeatCount = 16
@@ -33,13 +33,13 @@ func TestStoreLoad(t *testing.T) {
 		data := testrand.Bytes(blobSize)
 		temp := make([]byte, len(data))
 
-		refs := []storage.BlobRef{}
+		refs := []blobstore.BlobRef{}
 
 		namespace := testrand.Bytes(32)
 
 		// store without size
 		for i := 0; i < repeatCount; i++ {
-			ref := storage.BlobRef{
+			ref := blobstore.BlobRef{
 				Namespace: namespace,
 				Key:       testrand.Bytes(32),
 			}
@@ -62,7 +62,7 @@ func TestStoreLoad(t *testing.T) {
 		namespace = testrand.Bytes(32)
 		// store with size
 		for i := 0; i < repeatCount; i++ {
-			ref := storage.BlobRef{
+			ref := blobstore.BlobRef{
 				Namespace: namespace,
 				Key:       testrand.Bytes(32),
 			}
@@ -81,7 +81,7 @@ func TestStoreLoad(t *testing.T) {
 		namespace = testrand.Bytes(32)
 		// store with larger size
 		{
-			ref := storage.BlobRef{
+			ref := blobstore.BlobRef{
 				Namespace: namespace,
 				Key:       testrand.Bytes(32),
 			}
@@ -100,7 +100,7 @@ func TestStoreLoad(t *testing.T) {
 		namespace = testrand.Bytes(32)
 		// store with error
 		{
-			ref := storage.BlobRef{
+			ref := blobstore.BlobRef{
 				Namespace: namespace,
 				Key:       testrand.Bytes(32),
 			}
@@ -162,7 +162,7 @@ func TestStoreLoad(t *testing.T) {
 ////
 ////		data := testrand.Bytes(blobSize)
 ////
-////		ref := storage.BlobRef{
+////		ref := blobstore.BlobRef{
 ////			Namespace: []byte{0},
 ////			Key:       []byte{1},
 ////		}
@@ -225,15 +225,15 @@ func TestStoreLoad(t *testing.T) {
 ////		}
 ////	}
 ////
-////	func writeABlob(ctx context.Context, t testing.TB, store storage.Blobs, blobRef storage.BlobRef, data []byte, formatVersion storage.FormatVersion) {
+////	func writeABlob(ctx context.Context, t testing.TB, store blobstore.Blobs, blobRef blobstore.BlobRef, data []byte, formatVersion blobstore.FormatVersion) {
 ////		var (
-////			blobWriter storage.BlobWriter
+////			blobWriter blobstore.BlobWriter
 ////			err        error
 ////		)
 ////		switch formatVersion {
 ////		case filestore.FormatV0:
 ////			fStore, ok := store.(interface {
-////				TestCreateV0(ctx context.Context, ref storage.BlobRef) (_ storage.BlobWriter, err error)
+////				TestCreateV0(ctx context.Context, ref blobstore.BlobRef) (_ blobstore.BlobWriter, err error)
 ////			})
 ////			require.Truef(t, ok, "can't make a WriterForFormatVersion with this blob store (%T)", store)
 ////			blobWriter, err = fStore.TestCreateV0(ctx, blobRef)
@@ -253,21 +253,21 @@ func TestStoreLoad(t *testing.T) {
 ////		require.NoError(t, err)
 ////	}
 ////
-////	func verifyBlobHandle(t testing.TB, reader storage.BlobReader, expectDataLen int, expectFormat storage.FormatVersion) {
+////	func verifyBlobHandle(t testing.TB, reader blobstore.BlobReader, expectDataLen int, expectFormat blobstore.FormatVersion) {
 ////		assert.Equal(t, expectFormat, reader.StorageFormatVersion())
 ////		size, err := reader.Size()
 ////		require.NoError(t, err)
 ////		assert.Equal(t, int64(expectDataLen), size)
 ////	}
 ////
-////	func verifyBlobInfo(ctx context.Context, t testing.TB, blobInfo storage.BlobInfo, expectDataLen int, expectFormat storage.FormatVersion) {
+////	func verifyBlobInfo(ctx context.Context, t testing.TB, blobInfo blobstore.BlobInfo, expectDataLen int, expectFormat blobstore.FormatVersion) {
 ////		assert.Equal(t, expectFormat, blobInfo.StorageFormatVersion())
 ////		stat, err := blobInfo.Stat(ctx)
 ////		require.NoError(t, err)
 ////		assert.Equal(t, int64(expectDataLen), stat.Size())
 ////	}
 ////
-////	func tryOpeningABlob(ctx context.Context, t testing.TB, store storage.Blobs, blobRef storage.BlobRef, expectDataLen int, expectFormat storage.FormatVersion) {
+////	func tryOpeningABlob(ctx context.Context, t testing.TB, store blobstore.Blobs, blobRef blobstore.BlobRef, expectDataLen int, expectFormat blobstore.FormatVersion) {
 ////		reader, err := store.Open(ctx, blobRef)
 ////		require.NoError(t, err)
 ////		verifyBlobHandle(t, reader, expectDataLen, expectFormat)
@@ -303,8 +303,8 @@ func TestStoreLoad(t *testing.T) {
 ////			v0BlobKey = testrand.Bytes(keySize)
 ////			v1BlobKey = testrand.Bytes(keySize)
 ////
-////			v0Ref = storage.BlobRef{Namespace: namespace, Key: v0BlobKey}
-////			v1Ref = storage.BlobRef{Namespace: namespace, Key: v1BlobKey}
+////			v0Ref = blobstore.BlobRef{Namespace: namespace, Key: v0BlobKey}
+////			v1Ref = blobstore.BlobRef{Namespace: namespace, Key: v1BlobKey}
 ////		)
 ////
 ////		// write a V0 blob
@@ -349,7 +349,7 @@ func TestStoreLoad(t *testing.T) {
 // Check that the SpaceUsedForBlobs and SpaceUsedForBlobsInNamespace methods on
 // filestore.blobStore work as expected.
 func TestStoreSpaceUsed(t *testing.T) {
-	largefile.TestStores(t, func(ctx context.Context, store storage.Blobs) {
+	largefile.TestStores(t, func(ctx context.Context, t *testing.T, store blobstore.Blobs) {
 
 		var (
 			namespace      = testrand.Bytes(namespaceSize)
@@ -370,7 +370,7 @@ func TestStoreSpaceUsed(t *testing.T) {
 		var totalSoFar memory.Size
 		for _, size := range sizesToStore {
 			contents := testrand.Bytes(size)
-			blobRef := storage.BlobRef{Namespace: namespace, Key: testrand.Bytes(keySize)}
+			blobRef := blobstore.BlobRef{Namespace: namespace, Key: testrand.Bytes(keySize)}
 
 			blobWriter, err := store.Create(ctx, blobRef, int64(len(contents)))
 			require.NoError(t, err)
@@ -395,12 +395,12 @@ func TestStoreSpaceUsed(t *testing.T) {
 
 // Check that ListNamespaces and WalkNamespace work as expected.
 func TestStoreTraversals(t *testing.T) {
-	largefile.TestStores(t, func(ctx context.Context, store storage.Blobs) {
+	largefile.TestStores(t, func(ctx context.Context, t *testing.T, store blobstore.Blobs) {
 
 		// invent some namespaces and store stuff in them
 		type namespaceWithBlobs struct {
 			namespace []byte
-			blobs     []storage.BlobRef
+			blobs     []blobstore.BlobRef
 		}
 		const numNamespaces = 4
 		recordsToInsert := make([]namespaceWithBlobs, numNamespaces)
@@ -413,9 +413,9 @@ func TestStoreTraversals(t *testing.T) {
 			recordsToInsert[i].namespace[len(namespaceBase)-1] = byte(i)
 
 			// put varying numbers of blobs in the namespaces
-			recordsToInsert[i].blobs = make([]storage.BlobRef, i+1)
+			recordsToInsert[i].blobs = make([]blobstore.BlobRef, i+1)
 			for j := range recordsToInsert[i].blobs {
-				recordsToInsert[i].blobs[j] = storage.BlobRef{
+				recordsToInsert[i].blobs[j] = blobstore.BlobRef{
 					Namespace: recordsToInsert[i].namespace,
 					Key:       testrand.Bytes(keySize),
 				}
@@ -451,7 +451,7 @@ func TestStoreTraversals(t *testing.T) {
 			// keep track of which blobs we visit with WalkNamespace
 			found := make([]bool, len(expected.blobs))
 
-			err = store.WalkNamespace(ctx, expected.namespace, func(info storage.BlobInfo) error {
+			err = store.WalkNamespace(ctx, expected.namespace, func(info blobstore.BlobInfo) error {
 				gotBlobRef := info.BlobRef()
 				assert.Equal(t, expected.namespace, gotBlobRef.Namespace)
 				// find which blob this is in expected.blobs
@@ -491,7 +491,7 @@ func TestStoreTraversals(t *testing.T) {
 
 		// test WalkNamespace on a nonexistent namespace also
 		namespaceBase[len(namespaceBase)-1] = byte(numNamespaces)
-		err = store.WalkNamespace(ctx, namespaceBase, func(_ storage.BlobInfo) error {
+		err = store.WalkNamespace(ctx, namespaceBase, func(_ blobstore.BlobInfo) error {
 			t.Fatal("this should not have been called")
 			return nil
 		})
@@ -500,7 +500,7 @@ func TestStoreTraversals(t *testing.T) {
 		// check that WalkNamespace stops iterating after an error return
 		iterations := 0
 		expectedErr := errs.New("an expected error")
-		err = store.WalkNamespace(ctx, recordsToInsert[numNamespaces-1].namespace, func(_ storage.BlobInfo) error {
+		err = store.WalkNamespace(ctx, recordsToInsert[numNamespaces-1].namespace, func(_ blobstore.BlobInfo) error {
 			iterations++
 			if iterations == 2 {
 				return expectedErr
@@ -525,7 +525,7 @@ func TestStoreTraversals(t *testing.T) {
 // //
 // //		type testfile struct {
 // //			data      []byte
-// //			formatVer storage.FormatVersion
+// //			formatVer blobstore.FormatVersion
 // //		}
 // //		type testref struct {
 // //			key   []byte
@@ -595,16 +595,16 @@ func TestStoreTraversals(t *testing.T) {
 // //
 // //		for _, namespace := range namespaces {
 // //			for _, ref := range namespace.refs {
-// //				blobref := storage.BlobRef{
+// //				blobref := blobstore.BlobRef{
 // //					Namespace: namespace.namespace,
 // //					Key:       ref.key,
 // //				}
 // //
 // //				for _, file := range ref.files {
-// //					var w storage.BlobWriter
+// //					var w blobstore.BlobWriter
 // //					if file.formatVer == filestore.FormatV0 {
 // //						fStore, ok := store.(interface {
-// //							TestCreateV0(ctx context.Context, ref storage.BlobRef) (_ storage.BlobWriter, err error)
+// //							TestCreateV0(ctx context.Context, ref blobstore.BlobRef) (_ blobstore.BlobWriter, err error)
 // //						})
 // //						require.Truef(t, ok, "can't make TestCreateV0 with this blob store (%T)", store)
 // //						w, err = fStore.TestCreateV0(ctx, blobref)
@@ -639,13 +639,13 @@ func TestStoreTraversals(t *testing.T) {
 // //	}
 
 //func TestTrashAndRestore(t *testing.T) {
-//	largefile.TestStores(t, func(ctx context.Context, store storage.Blobs) {
+//	largefile.TestStores(t, func(ctx context.Context, store blobstore.Blobs) {
 //
 //		size := memory.KB
 //
 //		type testfile struct {
 //			data      []byte
-//			formatVer storage.FormatVersion
+//			formatVer blobstore.FormatVersion
 //		}
 //		type testref struct {
 //			key   []byte
@@ -676,13 +676,13 @@ func TestStoreTraversals(t *testing.T) {
 //
 //		for _, namespace := range namespaces {
 //			for _, ref := range namespace.refs {
-//				blobref := storage.BlobRef{
+//				blobref := blobstore.BlobRef{
 //					Namespace: namespace.namespace,
 //					Key:       ref.key,
 //				}
 //
 //				for _, file := range ref.files {
-//					var w storage.BlobWriter
+//					var w blobstore.BlobWriter
 //
 //					w, err = store.Create(ctx, blobref, int64(size))
 //
@@ -722,7 +722,7 @@ func TestStoreTraversals(t *testing.T) {
 //
 //		// Verify pieces are back and look good for first namespace
 //		for _, ref := range namespaces[0].refs {
-//			blobref := storage.BlobRef{
+//			blobref := blobstore.BlobRef{
 //				Namespace: namespaces[0].namespace,
 //				Key:       ref.key,
 //			}
@@ -733,7 +733,7 @@ func TestStoreTraversals(t *testing.T) {
 //
 //		// Verify pieces in second namespace are still missing (were not restored)
 //		for _, ref := range namespaces[1].refs {
-//			blobref := storage.BlobRef{
+//			blobref := blobstore.BlobRef{
 //				Namespace: namespaces[1].namespace,
 //				Key:       ref.key,
 //			}
@@ -746,7 +746,7 @@ func TestStoreTraversals(t *testing.T) {
 //	})
 //}
 //
-//func requireFileMatches(ctx context.Context, t *testing.T, store storage.Blobs, data []byte, ref storage.BlobRef, formatVer storage.FormatVersion) {
+//func requireFileMatches(ctx context.Context, t *testing.T, store blobstore.Blobs, data []byte, ref blobstore.BlobRef, formatVer blobstore.FormatVersion) {
 //	r, err := store.OpenWithStorageFormat(ctx, ref, formatVer)
 //	require.NoError(t, err)
 //
@@ -759,11 +759,11 @@ func TestStoreTraversals(t *testing.T) {
 // TestBlobMemoryBuffer ensures that buffering doesn't have problems with
 // small writes randomly seeked through the file.
 func TestBlobMemoryBuffer(t *testing.T) {
-	largefile.TestStores(t, func(ctx context.Context, store storage.Blobs) {
+	largefile.TestStores(t, func(ctx context.Context, t *testing.T, store blobstore.Blobs) {
 
 		const size = 2048
 
-		ref := storage.BlobRef{
+		ref := blobstore.BlobRef{
 			Namespace: testrand.Bytes(32),
 			Key:       testrand.Bytes(32),
 		}

@@ -229,6 +229,7 @@ github.com/rogpeppe/fastuuid v0.0.0-20150106093220-6724a57986af/go.mod h1:XWv6So
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rogpeppe/go-internal v1.9.0 h1:73kH8U+JUqXU8lRuOHeVHaa/SZPifC7BkcraZVejAe8=
 github.com/rogpeppe/go-internal v1.9.0/go.mod h1:WtVeX8xhTBvf0smdhujwtBcq4Qrzq/fJaraNFVN+nFs=
+github.com/rogpeppe/go-internal v1.10.0/go.mod h1:UQnix2H7Ngw/k4C5ijL5+65zddjncjaFoBhdsK/akog=
 github.com/rs/xid v1.2.1/go.mod h1:+uKXf+4Djp6Md1KODXJxgGQPKngRmWyn10oCKFzNHOQ=
 github.com/rs/zerolog v1.13.0/go.mod h1:YbFCdg8HfsridGWAh22vktObvhZbQsZXe4/zB0OKkWU=
 github.com/rs/zerolog v1.15.0/go.mod h1:xYTKnLHcpfU2225ny5qZjxnj9NvkumZYjJHlAThCjNc=
@@ -249,6 +250,8 @@ github.com/soheilhy/cmux v0.1.4/go.mod h1:IM3LyeVVIOuxMH7sFAkER9+bJ4dT7Ms6E4xg4k
 github.com/spacemonkeygo/monkit/v3 v3.0.4/go.mod h1:JcK1pCbReQsOsMKF/POFSZCq7drXFybgGmbc27tuwes=
 github.com/spacemonkeygo/monkit/v3 v3.0.19 h1:wqBb9bpD7jXkVi4XwIp8jn1fektaVBQ+cp9SHRXgAdo=
 github.com/spacemonkeygo/monkit/v3 v3.0.19/go.mod h1:kj1ViJhlyADa7DiA4xVnTuPA46lFKbM7mxQTrXCuJP4=
+github.com/spacemonkeygo/monkit/v3 v3.0.20-0.20230419135619-fb89f20752cb h1:kWLHxcYDcloMFEJMngxuKh8wcLl9RjjeAN2a9AtTtCg=
+github.com/spacemonkeygo/monkit/v3 v3.0.20-0.20230419135619-fb89f20752cb/go.mod h1:kj1ViJhlyADa7DiA4xVnTuPA46lFKbM7mxQTrXCuJP4=
 github.com/spacemonkeygo/monotime v0.0.0-20180824235756-e3f48a95f98a/go.mod h1:ul4bvvnCOPZgq8w0nTkSmWVg/hauVpFS97Am1YM1XXo=
 github.com/spaolacci/murmur3 v0.0.0-20180118202830-f09979ecbc72/go.mod h1:JwIasOWyU6f++ZhiEuf87xNszmSA2myDM2Kzu9HwQUA=
 github.com/spf13/afero v1.1.2/go.mod h1:j4pytiNVoe2o6bmDsKpLACNPDBIoEAkihy7loJ1B0CQ=
@@ -391,6 +394,8 @@ golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1/go.mod h1:oPkhp1MJrh7nUepCBc
 golang.org/x/sys v0.0.0-20211007075335-d3039528d8ac/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.6.0 h1:MVltZSvRTcU2ljQOhs94SXPftV6DCNnZViHeQps87pQ=
 golang.org/x/sys v0.6.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.7.0 h1:3jlCCIQZPdOYu1h8BkNvLz8Kgwtae2cagcG/VamtZRU=
+golang.org/x/sys v0.7.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201117132131-f5c789dd3221/go.mod h1:Nr5EML6q2oocZ2LXRh80K7BxOlk5/8JxuGnuhpl+muw=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
@@ -477,9 +482,18 @@ honnef.co/go/tools v0.0.1-2019.2.3/go.mod h1:a3bituU0lyd329TUQxRnasdCoJDkEUEAqEt
 rsc.io/binaryregexp v0.2.0/go.mod h1:qTv7/COck+e2FymRvadv62gMdZztPaShugOCi3I+8D8=
 storj.io/common v0.0.0-20230301105927-7f966760c100 h1:0Rc6boo10ZgiHdadHi1o2OUv25YvTn8fSc/VyRz2Tyk=
 storj.io/common v0.0.0-20230301105927-7f966760c100/go.mod h1:tDgoLthBVcrTPEokBgPdjrn39p/gyNx06j6ehhTSiUg=
+storj.io/common v0.0.0-20230504204616-8b62322ba410 h1:P4wWUrAx86rL7xbdvc3jj8ExnBGWtKYD1hDLkEzDwsE=
+storj.io/common v0.0.0-20230504204616-8b62322ba410/go.mod h1:j5YdcshmpJL+oW1+3IyBnCsv/HGbFkbzNDtuZg24KF0=
 storj.io/drpc v0.0.33-0.20230204035225-c9649dee8f2a h1:FBaOc8c5efmW3tmPsiGy07USMkOSu/tyYCZpu2ro0y8=
 storj.io/drpc v0.0.33-0.20230204035225-c9649dee8f2a/go.mod h1:6rcOyR/QQkSTX/9L5ZGtlZaE2PtXTTZl8d+ulSeeYEg=
+storj.io/drpc v0.0.33 h1:yCGZ26r66ZdMP0IcTYsj7WDAUIIjzXk6DJhbhvt9FHI=
+storj.io/drpc v0.0.33/go.mod h1:vR804UNzhBa49NOJ6HeLjd2H3MakC1j5Gv8bsOQT6N4=
 storj.io/private v0.0.0-20230123202745-d3e63b336444 h1:qwjIC8HoYGH8H5jYWhxPVUqKK2y3lWSnKZiPtWb08GA=
 storj.io/private v0.0.0-20230123202745-d3e63b336444/go.mod h1:hc63X333SVJ3UrOxXpGN4VnwqnmbWgAHln3wYJ8AroI=
+storj.io/private v0.0.0-20230405095015-9e5bbc1c7ca8/go.mod h1:JxBlgPwo+P0OOJDSPJLwBJWUPnhnvrHOlKAN0aV/bhY=
+storj.io/private v0.0.0-20230504144224-245360dc8212 h1:Rcm1J7vGYo0gMbV9u37u9RWH9jC7nFLAIurxR5kmjd8=
+storj.io/private v0.0.0-20230504144224-245360dc8212/go.mod h1:jyYzrgm0FX2NvrHGM48i6ihBuLRlo+Rtw2TtxW2h2qY=
+storj.io/storj v0.12.1-0.20230522143508-eabd9dd994e1 h1:tmKnU/Em9HYTmDnl8U7eMbIofdLETCQL7WjchPyBjCk=
+storj.io/storj v0.12.1-0.20230522143508-eabd9dd994e1/go.mod h1:A9kBRuOXcXhDmPbChkh21RVuvLnf+AxpxSgvD81HSck=
 storj.io/storj v1.74.4 h1:ddlQbQ/7Mm1meb7uBfGpiz26zSwOVc/3W7xWqIdF3gY=
 storj.io/storj v1.74.4/go.mod h1:7jQRT6b1wC6a4l/52EXtPfUcJEMx3l060FZzv/Kff/U=

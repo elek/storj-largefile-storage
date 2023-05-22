@@ -8,7 +8,7 @@ import (
 	"github.com/zeebo/errs"
 	"io"
 	"os"
-	"storj.io/storj/storage"
+	"storj.io/storj/storagenode/blobstore"
 )
 
 func init() {
@@ -50,7 +50,7 @@ func compact(dir string, newName string) error {
 		return errors.WithStack(err)
 	}
 
-	var ref storage.BlobRef
+	var ref blobstore.BlobRef
 	var size, offset int64
 	var sourceFile string
 

@@ -11,8 +11,8 @@ import (
 	"os"
 	"path/filepath"
 	"storj.io/common/storj"
-	"storj.io/storj/storage"
-	"storj.io/storj/storage/filestore"
+	"storj.io/storj/storagenode/blobstore"
+	"storj.io/storj/storagenode/blobstore/filestore"
 	"time"
 )
 
@@ -25,7 +25,7 @@ type LargeFileStore struct {
 	dir  string
 }
 
-var _ storage.Blobs = &LargeFileStore{}
+var _ blobstore.Blobs = &LargeFileStore{}
 
 func NewBlobStore(connDef string, dir string) (*LargeFileStore, error) {
 	conn, err := sql.Open("pgx", connDef)
@@ -41,27 +41,27 @@ func NewBlobStore(connDef string, dir string) (*LargeFileStore, error) {
 	}, nil
 
 }
-func (b *LargeFileStore) Create(ctx context.Context, ref storage.BlobRef, size int64) (storage.BlobWriter, error) {
+func (b *LargeFileStore) Create(ctx context.Context, ref blobstore.BlobRef, size int64) (blobstore.BlobWriter, error) {
 	return NewWriter(b.conn, b.dir, ref)
 }
 
-func (b *LargeFileStore) Open(ctx context.Context, ref storage.BlobRef) (storage.BlobReader, error) {
+func (b *LargeFileStore) Open(ctx context.Context, ref blobstore.BlobRef) (blobstore.BlobReader, error) {
 	return NewReader(b.conn, b.dir, ref)
 }
 
-func (b *LargeFileStore) OpenWithStorageFormat(ctx context.Context, ref storage.BlobRef, formatVer storage.FormatVersion) (storage.BlobReader, error) {
+func (b *LargeFileStore) OpenWithStorageFormat(ctx context.Context, ref blobstore.BlobRef, formatVer blobstore.FormatVersion) (blobstore.BlobReader, error) {
 	if formatVer != filestore.FormatV1 {
 		return nil, errs.New("Unsupported format")
 	}
 	return b.Open(ctx, ref)
 }
 
-func (b *LargeFileStore) Delete(ctx context.Context, ref storage.BlobRef) error {
+func (b *LargeFileStore) Delete(ctx context.Context, ref blobstore.BlobRef) error {
 	_, err := b.conn.Exec("DELETE FROM pieces WHERE namespace=$1 AND key=$2", ref.Namespace, ref.Key)
 	return errors.WithStack(err)
 }
 
-func (b *LargeFileStore) DeleteWithStorageFormat(ctx context.Context, ref storage.BlobRef, formatVer storage.FormatVersion) error {
+func (b *LargeFileStore) DeleteWithStorageFormat(ctx context.Context, ref blobstore.BlobRef, formatVer blobstore.FormatVersion) error {
 	if formatVer != filestore.FormatV1 {
 		return errs.New("Unsupported format")
 	}
@@ -74,7 +74,7 @@ func (b *LargeFileStore) DeleteNamespace(ctx context.Context, ref []byte) (err e
 	return errors.WithStack(err)
 }
 
-func (b *LargeFileStore) RenameRef(ctx context.Context, ref1 storage.BlobRef, name string) error {
+func (b *LargeFileStore) RenameRef(ctx context.Context, ref1 blobstore.BlobRef, name string) error {
 	var currentFileName string
 	err := b.conn.QueryRow("SELECT file FROM pieces WHERE namespace = $1 AND key =$2", ref1.Namespace, ref1.Key).Scan(&currentFileName)
 	if err != nil {
@@ -107,46 +107,24 @@ func (b *LargeFileStore) RenameRef(ctx context.Context, ref1 storage.BlobRef, na
 	return nil
 }
 
-func (b *LargeFileStore) Merge(ctx context.Context, ref1 storage.BlobRef, ref2 storage.BlobRef) error {
-	f1 := filepath.Join(b.dir, RefToFile(ref1))
-	f2 := filepath.Join(b.dir, RefToFile(ref2))
-	stat, err := os.Stat(f1)
-	if err != nil {
-		return err
-	}
-	dest, err := os.OpenFile(f1, os.O_WRONLY|os.O_APPEND, 0644)
-	if err != nil {
-		return err
-	}
-	defer dest.Close()
-	src, err := os.Open(f2)
-	if err != nil {
-		return err
-	}
-	defer src.Close()
-	_, err = io.Copy(dest, src)
-	if err != nil {
-		return err
-	}
-	_, err = b.conn.Exec("UPDATE pieces SET file=$1,start=$2 WHERE namespace = $3 and key = $4", RefToFile(ref1), stat.Size(), ref2.Namespace, ref2.Key)
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	err = os.Remove(f2)
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	return nil
-}
-
-func (b *LargeFileStore) Trash(ctx context.Context, ref storage.BlobRef) error {
+func (b *LargeFileStore) Trash(ctx context.Context, ref blobstore.BlobRef) error {
 	_, err := b.conn.Exec("UPDATE pieces SET trash = true WHERE namespace = $1 and key = $2", ref.Namespace, ref.Key)
 	return errors.WithStack(err)
 }
 
 func (b *LargeFileStore) RestoreTrash(ctx context.Context, namespace []byte) ([][]byte, error) {
-	_, err := b.conn.Exec("UPDATE pieces SET trash = false where namespace = $1 AND deleted = false", namespace)
-	return [][]byte{}, errors.WithStack(err)
+	keys := make([][]byte, 0)
+	rows, err := b.conn.Query("UPDATE pieces SET trash = false where namespace = $1 RETURNING key", namespace)
+	defer rows.Close()
+	for rows.Next() {
+		var key []byte
+		err := rows.Scan(&key)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+		keys = append(keys, key)
+	}
+	return keys, errors.WithStack(err)
 }
 
 func (b *LargeFileStore) EmptyTrash(ctx context.Context, namespace []byte, trashedBefore time.Time) (int64, [][]byte, error) {
@@ -154,12 +132,12 @@ func (b *LargeFileStore) EmptyTrash(ctx context.Context, namespace []byte, trash
 	return 0, [][]byte{}, errors.WithStack(err)
 }
 
-func (b *LargeFileStore) Stat(ctx context.Context, ref storage.BlobRef) (storage.BlobInfo, error) {
+func (b *LargeFileStore) Stat(ctx context.Context, ref blobstore.BlobRef) (blobstore.BlobInfo, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (b *LargeFileStore) StatWithStorageFormat(ctx context.Context, ref storage.BlobRef, formatVer storage.FormatVersion) (storage.BlobInfo, error) {
+func (b *LargeFileStore) StatWithStorageFormat(ctx context.Context, ref blobstore.BlobRef, formatVer blobstore.FormatVersion) (blobstore.BlobInfo, error) {
 	if formatVer != filestore.FormatV1 {
 		return nil, errs.New("Unsupported format")
 	}
@@ -189,7 +167,7 @@ func (b *LargeFileStore) SpaceUsedForTrash(ctx context.Context) (res int64, err 
 }
 
 func (b *LargeFileStore) SpaceUsedForBlobs(ctx context.Context) (res int64, err error) {
-	rows, err := b.conn.Query("SELECT count(size) FROM pieces WHERE NOT trash")
+	rows, err := b.conn.Query("SELECT sum(size) FROM pieces WHERE NOT trash")
 	if err != nil {
 		return 0, errors.WithStack(err)
 	}
@@ -197,12 +175,16 @@ func (b *LargeFileStore) SpaceUsedForBlobs(ctx context.Context) (res int64, err 
 	if !rows.Next() {
 		return 0, errors.New("No such result")
 	}
-	err = rows.Scan(&res)
+	var value *int64
+	err = rows.Scan(&value)
+	if value != nil {
+		res = *value
+	}
 	return res, err
 }
 
 func (b *LargeFileStore) SpaceUsedForBlobsInNamespace(ctx context.Context, namespace []byte) (res int64, err error) {
-	rows, err := b.conn.Query("SELECT count(size) FROM pieces WHERE NOT TRASH AND namespace=$1", namespace)
+	rows, err := b.conn.Query("SELECT sum(size) FROM pieces WHERE NOT TRASH AND namespace=$1", namespace)
 	if err != nil {
 		return 0, errors.WithStack(err)
 	}
@@ -210,7 +192,11 @@ func (b *LargeFileStore) SpaceUsedForBlobsInNamespace(ctx context.Context, names
 	if !rows.Next() {
 		return 0, errors.New("No such result")
 	}
-	err = rows.Scan(&res)
+	var value *int64
+	err = rows.Scan(&value)
+	if value != nil {
+		res = *value
+	}
 	return res, err
 }
 
@@ -232,7 +218,7 @@ func (b *LargeFileStore) ListNamespaces(ctx context.Context) ([][]byte, error) {
 	return res, nil
 }
 
-func (b *LargeFileStore) WalkNamespace(ctx context.Context, namespace []byte, walkFunc func(storage.BlobInfo) error) error {
+func (b *LargeFileStore) WalkNamespace(ctx context.Context, namespace []byte, walkFunc func(blobstore.BlobInfo) error) error {
 	rows, err := b.conn.Query("SELECT namespace,key,size FROM pieces WHERE not trash AND namespace=$1", namespace)
 	if err != nil {
 		return errors.WithStack(err)
@@ -240,7 +226,7 @@ func (b *LargeFileStore) WalkNamespace(ctx context.Context, namespace []byte, wa
 	defer rows.Close()
 	for rows.Next() {
 		b := BlobInfo{
-			ref: storage.BlobRef{},
+			ref: blobstore.BlobRef{},
 		}
 		err = rows.Scan(&b.ref.Namespace, &b.ref.Key, &b.size)
 		if err != nil {
@@ -268,7 +254,7 @@ func (b *LargeFileStore) Close() error {
 	return b.conn.Close()
 }
 
-func RefToFile(ref storage.BlobRef) string {
+func RefToFile(ref blobstore.BlobRef) string {
 	return filepath.Join(PathEncoding.EncodeToString(ref.Namespace), PathEncoding.EncodeToString(ref.Key)+".sj1")
 }
 

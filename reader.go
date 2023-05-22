@@ -6,8 +6,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"storj.io/storj/storage"
-	"storj.io/storj/storage/filestore"
+	"storj.io/storj/storagenode/blobstore"
+	"storj.io/storj/storagenode/blobstore/filestore"
 )
 
 type reader struct {
@@ -17,9 +17,9 @@ type reader struct {
 	virtualPos int64
 }
 
-var _ storage.BlobReader = &reader{}
+var _ blobstore.BlobReader = &reader{}
 
-func NewReader(db *sql.DB, dir string, ref storage.BlobRef) (*reader, error) {
+func NewReader(db *sql.DB, dir string, ref blobstore.BlobRef) (*reader, error) {
 	var file string
 	var size int64
 	var offset int64
@@ -108,6 +108,6 @@ func (r *reader) Size() (int64, error) {
 	return r.size, nil
 }
 
-func (r *reader) StorageFormatVersion() storage.FormatVersion {
+func (r *reader) StorageFormatVersion() blobstore.FormatVersion {
 	return filestore.FormatV1
 }

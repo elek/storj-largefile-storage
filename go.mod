@@ -9,9 +9,9 @@ require (
 	github.com/stretchr/testify v1.8.2
 	github.com/zeebo/errs v1.3.0
 	go.uber.org/zap v1.16.0
-	storj.io/common v0.0.0-20230301105927-7f966760c100
-	storj.io/private v0.0.0-20230123202745-d3e63b336444
-	storj.io/storj v1.74.4
+	storj.io/common v0.0.0-20230504204616-8b62322ba410
+	storj.io/private v0.0.0-20230504144224-245360dc8212
+	storj.io/storj v0.12.1-0.20230522143508-eabd9dd994e1
 )
 
 require (
@@ -28,16 +28,16 @@ require (
 	github.com/jackc/pgx/v4 v4.15.0 // indirect
 	github.com/jtolds/tracetagger/v2 v2.0.0-rc5 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/rogpeppe/go-internal v1.9.0 // indirect
-	github.com/spacemonkeygo/monkit/v3 v3.0.19 // indirect
+	github.com/rogpeppe/go-internal v1.10.0 // indirect
+	github.com/spacemonkeygo/monkit/v3 v3.0.20-0.20230419135619-fb89f20752cb // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/net v0.6.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/sys v0.7.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	storj.io/drpc v0.0.33-0.20230204035225-c9649dee8f2a // indirect
+	storj.io/drpc v0.0.33 // indirect
 )

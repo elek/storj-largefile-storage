@@ -8,6 +8,7 @@ import (
 	"github.com/zeebo/errs"
 	"io"
 	"os"
+	"path/filepath"
 	"storj.io/storj/storagenode/blobstore"
 )
 
@@ -23,7 +24,7 @@ func init() {
 }
 
 func compact(dir string, newName string) error {
-	c := os.Getenv("STORE_CONN")
+	c := os.Getenv("STORJ_LARGEFILE_CONN")
 	conn, err := sql.Open("pgx", c)
 	if err != nil {
 		return errors.WithStack(err)
@@ -36,10 +37,11 @@ func compact(dir string, newName string) error {
 	}
 	defer store.Close()
 
-	if _, err = os.Stat(newName); err != nil {
+	combinedFile := filepath.Join(dir, newName)
+	if _, err = os.Stat(combinedFile); err == nil {
 		return errs.New("File already exists.")
 	}
-	dest, err := os.Create(newName)
+	dest, err := os.Create(combinedFile)
 	if err != nil {
 		return errors.WithStack(err)
 	}

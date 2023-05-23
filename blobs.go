@@ -259,7 +259,7 @@ func RefToFile(ref blobstore.BlobRef) string {
 }
 
 func InitTable(conn *sql.DB) error {
-	_, err := conn.Exec("create table pieces (namespace BYTEA not null, key BYTEA not null, size int NOT NULL DEFAULT 0,trash bool not null default false,slot_id int not null,PRIMARY KEY(namespace, key))")
+	_, err := conn.Exec("create table pieces (namespace BYTEA not null, key BYTEA not null, size int NOT NULL DEFAULT 0,trash bool not null default false,slot_id int not null,created timestamp not null default current_timestamp,accessed timestamp not null default current_timestamp,PRIMARY KEY(namespace, key))")
 	if err != nil {
 		return err
 	}

@@ -42,6 +42,37 @@ func TestMoveToTrash(t *testing.T) {
 	})
 }
 
+func TestStat(t *testing.T) {
+	TestStores(t, func(ctx context.Context, t *testing.T, store blobstore.Blobs) {
+
+		ref1 := blobstore.BlobRef{
+			Namespace: []byte("ns"),
+			Key:       []byte("key1"),
+		}
+
+		out, err := store.Create(ctx, ref1, 10)
+		require.NoError(t, err)
+		_, err = out.Write([]byte("1234567890"))
+		require.NoError(t, err)
+		require.NoError(t, out.Commit(ctx))
+
+		stat, err := store.Stat(ctx, ref1)
+		require.NoError(t, err)
+		require.Equal(t, ref1, stat.BlobRef())
+
+		fs, err := stat.Stat(context.TODO())
+		require.NoError(t, err)
+		require.Equal(t, int64(10), fs.Size())
+
+		_, err = store.Stat(ctx, blobstore.BlobRef{
+			Namespace: []byte("ns"),
+			Key:       []byte("nosuch"),
+		})
+		require.Error(t, err)
+
+	})
+}
+
 func TestWriteWithSeek(t *testing.T) {
 	TestStores(t, func(ctx context.Context, t *testing.T, store blobstore.Blobs) {
 		ref1 := blobstore.BlobRef{

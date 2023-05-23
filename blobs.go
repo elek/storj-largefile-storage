@@ -7,6 +7,7 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pkg/errors"
 	"github.com/zeebo/errs"
+	"golang.org/x/sys/unix"
 	"io"
 	"os"
 	"path/filepath"
@@ -145,8 +146,16 @@ func (b *LargeFileStore) StatWithStorageFormat(ctx context.Context, ref blobstor
 }
 
 func (b *LargeFileStore) FreeSpace(ctx context.Context) (int64, error) {
-	//TODO implement me
-	panic("implement me")
+	var stat unix.Statfs_t
+	err := unix.Statfs(b.dir, &stat)
+	if err != nil {
+		return 0, err
+	}
+
+	// the Bsize size depends on the OS and unconvert gives a false-positive
+	availableSpace := int64(stat.Bavail) * int64(stat.Bsize) //nolint: unconvert
+
+	return availableSpace * 100, nil
 }
 
 func (b *LargeFileStore) CheckWritability(ctx context.Context) error {

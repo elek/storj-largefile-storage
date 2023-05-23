@@ -10,9 +10,9 @@ import (
 )
 
 type BlobInfo struct {
-	ref  blobstore.BlobRef
-	size int64
-	name string
+	ref     blobstore.BlobRef
+	size    int64
+	created time.Time
 }
 
 func (i BlobInfo) BlobRef() blobstore.BlobRef {
@@ -29,16 +29,18 @@ func (i BlobInfo) FullPath(ctx context.Context) (string, error) {
 
 func (i BlobInfo) Stat(ctx context.Context) (os.FileInfo, error) {
 	return FileInfo{
-		name: i.name,
-		size: i.size,
+		name:    "...",
+		size:    i.size,
+		created: i.created,
 	}, nil
 }
 
 var _ blobstore.BlobInfo = BlobInfo{}
 
 type FileInfo struct {
-	name string
-	size int64
+	name    string
+	size    int64
+	created time.Time
 }
 
 func (f FileInfo) Name() string {
@@ -55,7 +57,7 @@ func (f FileInfo) Mode() fs.FileMode {
 }
 
 func (f FileInfo) ModTime() time.Time {
-	return time.Now()
+	return f.created
 }
 
 func (f FileInfo) IsDir() bool {

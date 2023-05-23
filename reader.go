@@ -43,6 +43,12 @@ func NewReader(db *sql.DB, dir string, ref blobstore.BlobRef) (*reader, error) {
 	if offset > 0 {
 		source.Seek(offset, 0)
 	}
+
+	_, err = db.Exec("update pieces SET accessed = current_timestamp where namespace=$1 AND key=$2", ref.Namespace, ref.Key)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
 	return &reader{
 		source: source,
 		size:   size,
@@ -90,11 +96,11 @@ func (r *reader) Seek(offset int64, whence int) (int64, error) {
 	switch whence {
 	case 0:
 		r.virtualPos = r.offset
-		return r.Seek(offset+r.offset, whence)
+		return r.source.Seek(offset+r.offset, whence)
 
 	case 1:
 		r.virtualPos += offset
-		return r.Seek(offset, whence)
+		return r.source.Seek(offset, whence)
 	default:
 		return 0, errors.New("Unsupported whence")
 	}

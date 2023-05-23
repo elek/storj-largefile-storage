@@ -134,8 +134,27 @@ func (b *LargeFileStore) EmptyTrash(ctx context.Context, namespace []byte, trash
 }
 
 func (b *LargeFileStore) Stat(ctx context.Context, ref blobstore.BlobRef) (blobstore.BlobInfo, error) {
-	//TODO implement me
-	panic("implement me")
+	rows, err := b.conn.Query("select file,size,created from pieces where namespace=$1 AND key=$2 AND NOT trash", ref.Namespace, ref.Key)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	defer rows.Close()
+	if !rows.Next() {
+		return nil, os.ErrNotExist
+	}
+	var file string
+	var size int64
+	var created time.Time
+	err = rows.Scan(&file, &size, &created)
+	if err != nil {
+		return nil, err
+	}
+
+	return BlobInfo{
+		ref:     ref,
+		created: created,
+		size:    size,
+	}, nil
 }
 
 func (b *LargeFileStore) StatWithStorageFormat(ctx context.Context, ref blobstore.BlobRef, formatVer blobstore.FormatVersion) (blobstore.BlobInfo, error) {

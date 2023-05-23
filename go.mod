@@ -9,6 +9,7 @@ require (
 	github.com/stretchr/testify v1.8.2
 	github.com/zeebo/errs v1.3.0
 	go.uber.org/zap v1.16.0
+	golang.org/x/sys v0.7.0
 	storj.io/common v0.0.0-20230504204616-8b62322ba410
 	storj.io/private v0.0.0-20230504144224-245360dc8212
 	storj.io/storj v0.12.1-0.20230522143508-eabd9dd994e1
@@ -36,7 +37,6 @@ require (
 	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/net v0.6.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.7.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	storj.io/drpc v0.0.33 // indirect
